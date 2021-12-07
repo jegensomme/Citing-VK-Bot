@@ -26,6 +26,6 @@
 
 <h4>4) Run application</h4>
 
-```java -DAPP_ROOT=? -Dfile.encoding=UTF8 -jar target\citing-vk-bot-1.0.jar```
+```java -DAPP_ROOT=? -Dspring.profiles.active=production -Dfile.encoding=UTF8 -jar target\citing-vk-bot-1.0.jar```
 
 **Insert your path to application root instead of ? in ```-DAPP_ROOT=?```**
