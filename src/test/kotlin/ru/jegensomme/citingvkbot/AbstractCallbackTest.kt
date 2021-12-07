@@ -1,21 +1,18 @@
 package ru.jegensomme.citingvkbot
 
 import org.junit.jupiter.api.BeforeEach
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.client.ExpectedCount
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers
 import org.springframework.test.web.client.response.MockRestResponseCreators
 import org.springframework.web.client.RestTemplate
-import ru.jegensomme.citingvkbot.config.CallbackProperties
-import ru.jegensomme.citingvkbot.service.CallbackService
+import ru.jegensomme.citingvkbot.TestApplicationConfig.Companion.PROPERTIES
 import ru.jegensomme.citingvkbot.to.Callback
 import ru.jegensomme.citingvkbot.to.ErrorResponse
 import ru.jegensomme.citingvkbot.to.EventType
@@ -26,7 +23,8 @@ import ru.jegensomme.citingvkbot.util.writeValue
 import java.time.Instant
 
 @SpringBootTest
-@Import(AbstractCallbackTest.TestApplicationConfig::class)
+@ActiveProfiles("test")
+@Import(TestApplicationConfig::class)
 abstract class AbstractCallbackTest(
     private val restTemplate: RestTemplate,
 ) {
@@ -46,37 +44,23 @@ abstract class AbstractCallbackTest(
                 .body(writeValue(body)))
     }
 
-    @TestConfiguration
-    class TestApplicationConfig {
-        @Bean
-        fun callbackService(@Autowired restTemplate: RestTemplate): CallbackService {
-            return CallbackService(restTemplate, properties)
-        }
-    }
-
     protected companion object TestData {
         @JvmStatic
-        protected val properties = CallbackProperties()
+        protected val CONFIRMATION: Callback
 
         @JvmStatic
-        protected val confirmation: Callback
+        protected val MESSAGE_NEW: Callback
 
         @JvmStatic
-        protected val messageNew: Callback
+        protected val CALLBACK_WITH_INVALID_SECRET: Callback
 
         @JvmStatic
-        protected val callbackWithInvalidSecret: Callback
+        protected val SEND_MESSAGE: SendMessage
 
         @JvmStatic
-        protected val sendMessage: SendMessage
-
-        @JvmStatic
-        protected val errorResponse = ErrorResponse(5, "")
+        protected val ERROR_RESPONSE = ErrorResponse(5, "")
 
         init {
-            properties.accessToken = "access_token"
-            properties.confirmation = "confirmation"
-            properties.secret = "secret"
             val messageInfo: Map<String, Any> = mapOf(
                 "id" to 0,
                 "date" to Instant.now().epochSecond,
@@ -87,10 +71,10 @@ abstract class AbstractCallbackTest(
                 "conversation_message_id" to 0
             )
             val messageNewObject = mapOf("message" to messageInfo, "client_info" to mapOf())
-            confirmation = Callback(EventType.CONFIRMATION, null, 0, "", "secret" )
-            messageNew = Callback(EventType.MESSAGE_NEW, messageNewObject, 0, "", "secret" )
-            callbackWithInvalidSecret = Callback(EventType.MESSAGE_NEW, messageNewObject, 0, "", "invalid" )
-            sendMessage = SendMessage("Вы сказали: text", 1, properties.accessToken, properties.apiVersion, messageNewObject.hashCode(), messageNew.groupId)
+            CONFIRMATION = Callback(EventType.CONFIRMATION, null, 0, "", "secret" )
+            MESSAGE_NEW = Callback(EventType.MESSAGE_NEW, messageNewObject, 0, "", "secret" )
+            CALLBACK_WITH_INVALID_SECRET = Callback(EventType.MESSAGE_NEW, messageNewObject, 0, "", "invalid" )
+            SEND_MESSAGE = SendMessage("Вы сказали: text", 1, PROPERTIES.accessToken, PROPERTIES.apiVersion, messageNewObject.hashCode(), MESSAGE_NEW.groupId)
         }
     }
 }

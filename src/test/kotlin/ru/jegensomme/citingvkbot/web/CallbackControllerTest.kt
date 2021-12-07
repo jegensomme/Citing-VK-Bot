@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.web.client.RestTemplate
 import ru.jegensomme.citingvkbot.AbstractCallbackTest
+import ru.jegensomme.citingvkbot.TestApplicationConfig.Companion.PROPERTIES
 import ru.jegensomme.citingvkbot.util.writeValue
 
 @AutoConfigureMockMvc
@@ -26,18 +27,18 @@ internal class CallbackControllerTest(
     fun handleConfirmation() {
         perform(MockMvcRequestBuilders.post("/")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(writeValue(confirmation)))
+            .content(writeValue(CONFIRMATION)))
             .andDo(print())
             .andExpect(status().isOk)
-            .andExpect { assertEquals(properties.confirmation, it.response.contentAsString) }
+            .andExpect { assertEquals(PROPERTIES.confirmation, it.response.contentAsString) }
     }
 
     @Test
     fun handleMessageNew() {
-        prepareMockServer(sendMessage, HttpStatus.OK, emptyMap<String, Any>())
+        prepareMockServer(SEND_MESSAGE, HttpStatus.OK, emptyMap<String, Any>())
         perform(MockMvcRequestBuilders.post("/")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(writeValue(messageNew)))
+            .content(writeValue(MESSAGE_NEW)))
             .andDo(print())
             .andExpect(status().isOk)
             .andExpect { assertEquals("ok", it.response.contentAsString) }
@@ -48,17 +49,17 @@ internal class CallbackControllerTest(
     fun handleWithInvalidSecret() {
         perform(MockMvcRequestBuilders.post("/")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(writeValue(callbackWithInvalidSecret)))
+            .content(writeValue(CALLBACK_WITH_INVALID_SECRET)))
             .andDo(print())
             .andExpect(status().isForbidden)
     }
 
     @Test
     fun handleWithErrorResponse() {
-        prepareMockServer(sendMessage, HttpStatus.OK, mapOf("error" to errorResponse))
+        prepareMockServer(SEND_MESSAGE, HttpStatus.OK, mapOf("error" to ERROR_RESPONSE))
         perform(MockMvcRequestBuilders.post("/")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(writeValue(messageNew)))
+            .content(writeValue(MESSAGE_NEW)))
             .andDo(print())
             .andExpect(status().isInternalServerError)
         mockServer.verify()

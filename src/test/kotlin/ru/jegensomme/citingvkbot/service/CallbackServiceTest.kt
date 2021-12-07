@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.RestTemplate
 import ru.jegensomme.citingvkbot.AbstractCallbackTest
+import ru.jegensomme.citingvkbot.TestApplicationConfig.Companion.PROPERTIES
 import ru.jegensomme.citingvkbot.error.SecretMismatchException
 import ru.jegensomme.citingvkbot.error.SendMessageException
 
@@ -17,25 +18,25 @@ internal class CallbackServiceTest(
 {
     @Test
     fun confirm() {
-        assertEquals(service.confirm(confirmation), properties.confirmation)
+        assertEquals(service.confirm(CONFIRMATION), PROPERTIES.confirmation)
     }
 
     @Test
     fun reply() {
-        prepareMockServer(sendMessage, HttpStatus.OK, emptyMap<String, Any>())
-        assertEquals(service.reply(messageNew), "ok")
+        prepareMockServer(SEND_MESSAGE, HttpStatus.OK, emptyMap<String, Any>())
+        assertEquals(service.reply(MESSAGE_NEW), "ok")
         mockServer.verify()
     }
 
     @Test
     fun replyWithInvalidSecret() {
-        assertThrows(SecretMismatchException::class.java) { service.reply(callbackWithInvalidSecret) }
+        assertThrows(SecretMismatchException::class.java) { service.reply(CALLBACK_WITH_INVALID_SECRET) }
     }
 
     @Test
     fun replyWithErrorResponse() {
-        prepareMockServer(sendMessage, HttpStatus.OK, mapOf("error" to errorResponse))
-        assertThrows(SendMessageException::class.java) { service.reply(messageNew) }
+        prepareMockServer(SEND_MESSAGE, HttpStatus.OK, mapOf("error" to ERROR_RESPONSE))
+        assertThrows(SendMessageException::class.java) { service.reply(MESSAGE_NEW) }
         mockServer.verify()
     }
 }
