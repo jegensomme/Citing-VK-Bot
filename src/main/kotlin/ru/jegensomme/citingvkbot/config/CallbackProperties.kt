@@ -15,8 +15,4 @@ class CallbackProperties {
     @NotBlank lateinit var confirmation: String
     @NotBlank lateinit var secret: String
     val apiVersion: String = "5.131"
-
-    init {
-        print("")
-    }
 }
